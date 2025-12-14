@@ -1,3 +1,31 @@
+"""DETA with DINOv3-ViT-Base/16 Backbone Configuration.
+
+This configuration file sets up DETA (NMS Strikes Back) with a DINOv3 ViT-Base
+backbone for COCO object detection.
+
+DINOv3 is a self-supervised vision transformer pretrained on 1.6B+ images,
+providing strong visual representations for downstream tasks.
+
+Key Features:
+    - Backbone: DINOv3-ViT-Base/16 (768 embed_dim, 12 layers)
+    - Multi-scale features: Extracted from layers [3, 7, 11]
+    - Frozen backbone: Transfer learning mode (faster convergence)
+    - 5-level feature pyramid: Created by ChannelMapper neck
+
+Usage:
+    python projects/deta/train_net.py \
+        --config-file projects/deta/configs/deta_dinov3_vitb16.py \
+        --num-gpus 8
+
+For other DINOv3 variants, modify:
+    - model.backbone.model_name (vits16, vitl16, convnext_base, etc.)
+    - model.backbone.checkpoint_path
+    - model.backbone.out_indices (adjust for model depth)
+    - EMBED_DIM and model.neck.input_shapes
+
+See README_DINOV3.md for detailed documentation.
+"""
+
 from detrex.config import get_config
 from .models.deta_dinov3 import model
 from .scheduler.coco_scheduler import lr_multiplier_12ep_10drop as lr_multiplier

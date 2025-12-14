@@ -1,3 +1,56 @@
+"""DETA Model Configuration with DINOv3 Backbone.
+
+This module defines the model architecture for DETA (Detection Transformers with
+Assignment) using DINOv3 as the backbone.
+
+Architecture Overview:
+    1. Backbone: DINOv3 (ViT or ConvNeXt variants)
+       - Extracts multi-scale features from intermediate layers
+       - Default: ViT-Base/16 with features from layers [3, 7, 11]
+    
+    2. Neck: ChannelMapper
+       - Converts backbone features to 256 channels
+       - Generates 5-level feature pyramid for deformable attention
+    
+    3. Transformer: DeformableDetrTransformer
+       - Encoder: 6 layers with multi-scale deformable attention
+       - Decoder: 6 layers with iterative bounding box refinement
+       - Two-stage: Initial proposals from encoder features
+    
+    4. Criterion: DETACriterion
+       - Focal loss for classification
+       - L1 + GIoU loss for bbox regression
+       - Assignment for both encoder and decoder predictions
+
+Supported DINOv3 Models:
+    - ViT-S/16: embed_dim=384, depth=12
+    - ViT-B/16: embed_dim=768, depth=12 (default)
+    - ViT-L/16: embed_dim=1024, depth=24
+    - ViT-H+/16: embed_dim=1280, depth=32
+    - ConvNeXt-Base: dims=[128, 256, 512, 1024]
+    - ConvNeXt-Large: dims=[192, 384, 768, 1536]
+
+To customize the backbone:
+    1. Set DINOV3_MODEL_NAME to desired variant
+    2. Set DINOV3_EMBED_DIM to match the variant's embedding dimension
+    3. Set DINOV3_CHECKPOINT to the checkpoint path
+    4. Adjust DINOV3_OUT_INDICES based on model depth
+
+Example:
+    # For ViT-Large
+    DINOV3_MODEL_NAME = "vitl16"
+    DINOV3_EMBED_DIM = 1024
+    DINOV3_OUT_INDICES = [7, 15, 23]  # 24-layer model
+    
+    # For ConvNeXt-Base
+    DINOV3_MODEL_NAME = "convnext_base"
+    DINOV3_OUT_INDICES = [1, 2, 3]  # Use stages 1, 2, 3
+    # Note: ConvNeXt uses different channels per stage
+
+Authors: detrex contributors
+License: Apache-2.0
+"""
+
 import torch.nn as nn
 
 from detectron2.layers import ShapeSpec
